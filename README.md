@@ -6,7 +6,7 @@ I’ve placed some starter code in this Git repo [https://github.com/abpw/csc-24
 
 Like last time, by default, the server, VPN server, client, and certificate authority are configured to run on compatible sockets, but if you'd like to change any ip addresses or ports you can use command line arguments to do so. To use secure_server.py's command line arguments, for example, you can run "python3 secure_server.py --help" from command line in the directory the secure_server.py file is stored.
 
-Note that all four files must be stored in the same direcory as "arguments.py" to run correctly, and the certificate authority should be started before the secure server, and the secure client should be run last.
+Note that all four files must be stored in the same directory as "arguments.py" to run correctly, and the certificate authority should be started before the secure server, and the secure client should be run last.
 
 Although "echo-server.py" is included as a test server, your client and VPN should be able to interact with any server with any functionality that follows this type of protocol:
 

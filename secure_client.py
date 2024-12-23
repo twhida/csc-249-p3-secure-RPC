@@ -19,8 +19,8 @@ args = parser.parse_args()
 
 SERVER_IP = args.server_IP  # The server's IP address
 SERVER_PORT = args.server_port  # The port used by the server
-VPN_IP = args.VPN_IP  # The server's IP address
-VPN_PORT = args.VPN_port  # The port used by the server
+VPN_IP = args.VPN_IP  # The VPN's IP address
+VPN_PORT = args.VPN_port  # The port used by the VPN
 CA_IP = args.CA_IP # the IP address used by the certificate authority
 CA_PORT = args.CA_port # the port used by the certificate authority
 MSG = ' '.join(args.message) # The message to send to the server
@@ -51,20 +51,59 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
     ## Instructions ##
     # Fill this function in with the TLS handshake:
     #  * Request a TLS handshake from the server
+    print("Requesting a TLS handshake from the server.")
+
     #  * Receive a signed certificate from the server
+    signed_certificate = connection.recv(1024).decode('utf-8')
+    print(f"Recieved a signed certificate: {signed_certificate} from the server")
+
     #  * Verify the certificate with the certificate authority's public key
-    #    * Use cryptography_simulator.verify_certificate()
+    #    * Use cryptgraphy_simulator.verify_certificate()
+    # if verification is successful, returns the unsigned certificate
+    # if verification is unsuccessful, throws an AssertionError exception (catch it with a try/except!)
+    try:
+        print("Verifying the certificate with the certificate authority's public key.")
+        unsigned_certificate = cryptgraphy_simulator.verify_certificate(CA_public_key, signed_certificate)
+        print(f"Verification successful, return unsigned certificate: {unsigned_certificate}")
+    except Exception as e:
+        print(f"Error verifying certificate: {e}")
+        return None
+    
     #  * Extract the server's public key, IP address, and port from the certificate
+    try:
+        cert_public_key, cert_SERVER_IP, cert_SERVER_PORT = unsigned_certificate.split(':')
+        server_public_key = eval(cert_public_key)
+        cert_SERVER_PORT = int(cert_SERVER_PORT)
+        print(f"Extracted server public key: {server_public_key}, extracted server IP address: {cert_SERVER_IP}, extracted server PORT: {cert_SERVER_PORT}")
+    except Exception as e:
+        print(f"Error extracting details from certificate {e}")
+        return None
+    
     #  * Verify that you're communicating with the port and IP specified in the certificate
+    real_SERVER_IP, real_SERVER_PORT = connection.getpeername()
+    if cert_SERVER_IP != real_SERVER_IP or cert_SERVER_PORT != real_SERVER_PORT:
+        print(f"The server IP and PORT extracted from the certificate {cert_SERVER_IP}, {cert_SERVER_PORT} do not match the actual connection: {real_SERVER_IP},{real_SERVER_PORT}.")
+        return None
+    print("The server IP and PORT extracted from the certificate were verified successfully.")
+    
     #  * Generate a symmetric key to send to the server
     #    * Use cryptography_simulator.generate_symmetric_key()
+    symmetric_key = cryptgraphy_simulator.generate_symmetric_key()
+    print(f"Generating a symmetric key to send to the server: {symmetric_key}")
+
     #  * Use the server's public key to encrypt the symmetric key
     #    * Use cryptography_simulator.public_key_encrypt()
+    encrypted_symmetric_key = cryptgraphy_simulator.public_key_encrypt(server_public_key, symmetric_key)
+    print(f"Encrypting symmetric key using server's public key extracted from certificate: {encrypted_symmetric_key}")
+    
     #  * Send the encrypted symmetric key to the server
+    connection.sendall(encrypted_symmetric_key.encode('utf-8'))
+    print("Sending encrypted symmetric key to the server.")
+
     #  * Return the symmetric key for use in further communications with the server
+    return symmetric_key
     # Make sure to use encode_message() on the first message so the VPN knows which 
     # server to connect with
-    return 0
 
 print("Client starting - connecting to VPN at IP", VPN_IP, "and port", VPN_PORT)
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

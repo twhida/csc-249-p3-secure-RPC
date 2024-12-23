@@ -28,7 +28,7 @@ SERVER_PORT = args.server_port  # Port to listen on (non-privileged ports are > 
 
 # Format and return a certificate containing the server's socket information and public key
 def format_certificate(public_key):
-    unsigned_certificate = '' # replace this line
+    unsigned_certificate = f"{public_key}:{SERVER_IP}:{SERVER_PORT}" # replace this line
     print(f"Prepared the formatted unsigned certificate '{unsigned_certificate}'")
     return unsigned_certificate
 
@@ -59,10 +59,18 @@ def TLS_handshake_server(connection):
     ## Instructions ##
     # Fill this function in with the TLS handshake:
     #  * Receive a request for a TLS handshake from the client
+
+
     #  * Send a signed certificate to the client
     #    * A signed certificate variable should be available as 'signed_certificate'
+
+
     #  * Receive an encrypted symmetric key from the client
+
+
     #  * Decrypt and return the symmetric key for use in further communications with the client
+
+    
     return 0
 
 def process_message(message):
