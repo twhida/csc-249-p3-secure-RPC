@@ -148,7 +148,7 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
         print("Verifying the certificate with the certificate authority's public key.")
         unsigned_certificate = cryptgraphy_simulator.verify_certificate(CA_public_key, signed_certificate)
         print(f"Verification successful, return unsigned certificate: {unsigned_certificate}")
-    except Exception sas e:
+    except Exception as e:
         print(f"Error verifying certificate: {e}")
         return None
     
