@@ -59,24 +59,68 @@ def TLS_handshake_server(connection):
     ## Instructions ##
     # Fill this function in with the TLS handshake:
     #  * Receive a request for a TLS handshake from the client
-
-
+    print("Waiting for TLS handshake request from the client.")
+    handshake_request = connection.recv(1024).decode('utf-8')
+    print(f"Received TLS handshake request: {handshake_request}")
+    print("Proceeding with TLS handshake.")
     #  * Send a signed certificate to the client
     #    * A signed certificate variable should be available as 'signed_certificate'
+    # public_key = cryptgraphy_simulator.asymmetric_key_gen()[0]
+    server_certificate = f"{public_key}:{SERVER_IP}:{SERVER_PORT}"
+    # call this function to encrypt with a public key
+    # public_key_encrypt(key, message)
+    signed_certificate = "D" + cryptgraphy_simulator.public_key_encrypt(public_key, server_certificate)
+    print(f"Sending signed certificate: {signed_certificate} to client.")
 
+    connection.sendall(signed_certificate.encode('utf-8'))
+    print(f"Sending signed certificate: {signed_certificate} to client for asymmetric encryption process.")
 
     #  * Receive an encrypted symmetric key from the client
-
+    encrypted_symmetric_key = connection.recv(1024).decode('utf-8')
+    print(f"Received encrypted symmetric key: {encrypted_symmetric_key}")
 
     #  * Decrypt and return the symmetric key for use in further communications with the client
+    # call this function to decrypt with a private key
+    # private_key_decrypt(key, cyphertext) 
+    symmetric_key = cryptgraphy_simulator.private_key_decrypt(private_key, encrypted_symmetric_key)
+    print(f"Symmetric key decrypted successfully: {symmetric_key}")
 
-    
-    return 0
+    return symmetric_key
 
 def process_message(message):
-    # Change this function to change the service your server provides
-    # Right now, this is an echo server, which is fine, but a bit dull
-    return message
+    # -------------------------- from project 1 --------------------------
+    print(f"Order recieved: {message}")
+    order = message.split(",")
+    order_type = order[0].strip()
+
+    if order_type == "scoop":
+        if len(order) < 5:
+            return "Your scoop order is missing your preferences! Please try again."
+        size = order[1].strip()
+        flavor = order[2].strip()
+        syrup = order[3].strip()
+        syrup2 = order[4].strip()
+        return f"Here is your {size} {flavor} {order_type} with {syrup} {syrup2}!"
+
+    elif order_type == "milkshake":
+        if len(order) < 4:
+            return "Your milkshake order is missing your preferences! Please try again."
+        flavor = order[1].strip()
+        milk = order[2].strip()
+        milk2 = order[3].strip()
+        syrup = order[4].strip()
+        return f"Here is your {flavor} {order_type} with {milk} {milk2} and {syrup}!"
+
+    elif order_type == "chipwich":
+        if len(order) < 3:
+            return "Your chipwich order is missing your preferences! Please try again."
+        flavor = order[1].strip()
+        cookie = order[2].strip()
+        cookie2 = order[3].strip()
+        return f"Here is your {flavor} chipwich with {cookie} {cookie2} cookies!"
+    else:
+        return "You did not specify an order type! Please try ordering again."
+# -------------------------- from project 1 --------------------------
 
 print("server starting - listening for connections at IP", SERVER_IP, "and port", SERVER_PORT)
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

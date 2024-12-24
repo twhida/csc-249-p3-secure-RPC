@@ -42,6 +42,85 @@ if not args.CA_public_key:
 else:
     CA_public_key = eval(args.CA_public_key)
 
+## --------------------------------- from the project 1 ----------------------------
+#introduction, connection confirmation
+print("Welcome to Tomoko's Really Pretty Cool (RPC) Ice Cream Stand!\n")
+print("Customer identified! - Connecting you to cashier", VPN_IP, "and port...", VPN_PORT)
+
+#initalizing arguments/parameters for operations
+#these arguments will be updated with user input
+order_type = ""
+size = ""
+flavor = ""
+syrup = ""
+milk = ""
+cookie = ""
+
+#order type is updated first, and handles misspelling or empty inputs
+while order_type not in ["scoop", "milkshake", "chipwich"]:
+    order_type = input("Would you like a scoop, milkshake, or chipwich?\n")   
+    if order_type not in ["scoop", "milkshake", "chipwich"]:
+        print("I didn't quite catch that! Please choose either scoop, milkshake, or chipwich: ")
+
+    #arguments for scoop order type are updated and include size, flavor, and choice of syrup
+    #error handling implemented with if statements!
+    if order_type == "scoop":
+        while size not in ["small", "medium", "large"]:
+            size = input("Specify the cup size: small, medium, large: \n")
+            if size not in ["small", "medium", "large"]:
+                print("I didn't quite catch that! Please choose either small, medium, or large: \n" )
+        
+        while flavor not in ["strawberry", "chocolate", "vanilla"]:
+            flavor = input("Specify a flavor: strawberry, chocolate, vanilla: \n")
+            if flavor not in ["strawberry", "chocolate", "vanilla"]:
+                print("I didn't quite catch that! Please choose either strawberry, chocolate, vanilla: \n")
+
+        while syrup not in ["no syrup", "chocolate syrup", "cherry syrup"]:
+            syrup = input("Choose a syrup: no syrup, chocolate syrup, or cherry syrup: \n")
+            if syrup not in ["no syrup", "chocolate syrup", "cherry syrup"]:
+                print("I didn't quite catch that! Please choose either no syrup, chocolate syrup, or cherry syrup: \n")
+
+    #arguments for milkshake order type are updated and include flavor, milk type, and choice of syrup
+    #error handling implemented with if statements!
+    elif order_type == "milkshake":
+        while flavor not in ["strawberry", "chocolate", "vanilla"]:
+            flavor = input("Specify a flavor: strawberry, chocolate, vanilla: \n")
+            if flavor not in ["strawberry", "chocolate", "vanilla"]:
+                print("I didn't quite catch that! Please choose either strawberry, chocolate, vanilla: \n")
+        
+        while milk not in ["dairy milk", "oat milk", "almond milk", "soy milk"]:
+            milk = input("Choose your milk or alternative: dairy milk, oat milk, almond milk, or soy milk: \n")
+            if milk not in ["dairy milk", "oat milk", "almond milk", "soy milk"]:
+                print("I didn't quite catch that! Please choose either dairy milk, oat milk, almond milk, or soy milk: \n")
+        
+        while syrup not in ["no syrup", "chocolate syrup", "cherry syrup"]:
+            syrup = input("Choose a syrup: no syrup, chocolate syrup, or cherry syrup: \n")
+            if syrup not in ["no syrup", "chocolate syrup", "cherry syrup"]:
+                print("I didn't quite catch that! Please choose either no syrup, chocolate syrup, or cherry syrup: \n")
+
+    #arguments for chipwich order type are updated and include flavor and choice of cookie
+    #error handling implemented with if statements!
+    elif order_type == "chipwich":
+        while flavor not in ["strawberry", "chocolate", "vanilla"]:
+            flavor = input("Specify a flavor: strawberry, chocolate, vanilla: \n")
+            if flavor not in ["strawberry", "chocolate", "vanilla"]:
+                print("I didn't quite catch that! Please choose either strawberry, chocolate, vanilla: \n")
+        
+        while cookie not in ["chocolate chip", "oatmeal raisin", "ginger bread"]:
+            cookie = input("Choose the cookies for your ice cream sandwich: chocolate chip, oatmeal raisin, ginger bread: \n")
+            if cookie not in ["chocolate chip", "oatmeal raisin", "ginger bread"]:
+                print("I didn't quite catch that! Please choose either chocolate chip, oatmeal raisin, or ginger bread: \n")
+
+#order_message created based on order type
+if order_type == "scoop":
+    order_message = f"{order_type},{size},{flavor},{syrup}"
+elif order_type == "milkshake":
+    order_message = f"{order_type},{flavor},{milk},{syrup}"
+elif order_type == "chipwich":
+    order_message = f"{order_type},{flavor},{cookie}"
+
+## -------------------------------- from project 1 -------------------------------------
+
 # Add an application-layer header to the message that the VPN can use to forward it
 def encode_message(message):
     message = str(SERVER_IP) + '~IP~' +str(SERVER_PORT) + '~port~' + message
@@ -52,9 +131,13 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
     # Fill this function in with the TLS handshake:
     #  * Request a TLS handshake from the server
     print("Requesting a TLS handshake from the server.")
+    connection.sendall(bytes("TLS_HANDSHAKE_REQUEST", 'utf-8'))
 
     #  * Receive a signed certificate from the server
     signed_certificate = connection.recv(1024).decode('utf-8')
+    if not signed_certificate:
+        print("Error: Received an empty signed certificate.")
+    # Handle this error case appropriately
     print(f"Recieved a signed certificate: {signed_certificate} from the server")
 
     #  * Verify the certificate with the certificate authority's public key
@@ -65,7 +148,7 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
         print("Verifying the certificate with the certificate authority's public key.")
         unsigned_certificate = cryptgraphy_simulator.verify_certificate(CA_public_key, signed_certificate)
         print(f"Verification successful, return unsigned certificate: {unsigned_certificate}")
-    except Exception as e:
+    except Exception sas e:
         print(f"Error verifying certificate: {e}")
         return None
     
@@ -89,6 +172,9 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
     #  * Generate a symmetric key to send to the server
     #    * Use cryptography_simulator.generate_symmetric_key()
     symmetric_key = cryptgraphy_simulator.generate_symmetric_key()
+    if symmetric_key is None:
+        print("Failed to generate symmetric key.")
+        return None
     print(f"Generating a symmetric key to send to the server: {symmetric_key}")
 
     #  * Use the server's public key to encrypt the symmetric key
