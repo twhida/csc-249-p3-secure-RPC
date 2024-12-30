@@ -23,7 +23,7 @@ VPN_IP = args.VPN_IP  # The VPN's IP address
 VPN_PORT = args.VPN_port  # The port used by the VPN
 CA_IP = args.CA_IP # the IP address used by the certificate authority
 CA_PORT = args.CA_port # the port used by the certificate authority
-MSG = ' '.join(args.message) # The message to send to the server
+# MSG = ' '.join(args.message) # The message to send to the server
 
 if not args.CA_public_key:
     # If the certificate authority's public key isn't provided on the command line,
@@ -113,11 +113,11 @@ while order_type not in ["scoop", "milkshake", "chipwich"]:
 
 #order_message created based on order type
 if order_type == "scoop":
-    order_message = f"{order_type},{size},{flavor},{syrup}"
+    MSG = f"{order_type},{size},{flavor},{syrup}"
 elif order_type == "milkshake":
-    order_message = f"{order_type},{flavor},{milk},{syrup}"
+    MSG = f"{order_type},{flavor},{milk},{syrup}"
 elif order_type == "chipwich":
-    order_message = f"{order_type},{flavor},{cookie}"
+    MSG = f"{order_type},{flavor},{cookie}"
 
 ## -------------------------------- from project 1 -------------------------------------
 
@@ -131,7 +131,8 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
     # Fill this function in with the TLS handshake:
     #  * Request a TLS handshake from the server
     print("Requesting a TLS handshake from the server.")
-    connection.sendall(bytes("TLS_HANDSHAKE_REQUEST", 'utf-8'))
+    handshake_req = encode_message("TLS_HANDSHAKE_REQUEST")
+    connection.sendall(bytes(handshake_req, 'utf-8'))
 
     #  * Receive a signed certificate from the server
     signed_certificate = connection.recv(1024).decode('utf-8')
@@ -146,6 +147,7 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
     # if verification is unsuccessful, throws an AssertionError exception (catch it with a try/except!)
     try:
         print("Verifying the certificate with the certificate authority's public key.")
+        
         unsigned_certificate = cryptgraphy_simulator.verify_certificate(CA_public_key, signed_certificate)
         print(f"Verification successful, return unsigned certificate: {unsigned_certificate}")
     except Exception as e:
@@ -162,8 +164,26 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
         print(f"Error extracting details from certificate {e}")
         return None
     
+    print("Indicating successful retrieval of public key, ip, and port from signed certificate.")
+    success_certificate = encode_message("SUCCESS")
+    connection.sendall(bytes(success_certificate, 'utf-8'))
+
+    #  * Receive a port and ip from server
+    real_server_ip_port = connection.recv(1024).decode('utf-8')
+    try:
+        real_SERVER_IP, real_SERVER_PORT = real_server_ip_port.split(':')
+        real_SERVER_PORT = int(real_SERVER_PORT)
+        print(f"Extracted real server IP: {real_SERVER_IP} and real server PORT {real_SERVER_PORT}.")
+    except Exception as e:
+        print(f"Error extracting real server IP and PORT {e}.")
+        return None
     #  * Verify that you're communicating with the port and IP specified in the certificate
-    real_SERVER_IP, real_SERVER_PORT = connection.getpeername()
+    # ask VPN to return the connection.peername() it is communicating with
+    # create a real_server_ip, real_server_port = connection.peername() in vpn.py
+    # ask the vpn to send the real_server_ip and real_server_port information to client
+    # client real_server_ip_port = connection.recv(1024).decode('utf-8')
+
+    # and return that back to the client
     if cert_SERVER_IP != real_SERVER_IP or cert_SERVER_PORT != real_SERVER_PORT:
         print(f"The server IP and PORT extracted from the certificate {cert_SERVER_IP}, {cert_SERVER_PORT} do not match the actual connection: {real_SERVER_IP},{real_SERVER_PORT}.")
         return None

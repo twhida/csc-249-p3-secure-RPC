@@ -66,14 +66,24 @@ def TLS_handshake_server(connection):
     #  * Send a signed certificate to the client
     #    * A signed certificate variable should be available as 'signed_certificate'
     # public_key = cryptgraphy_simulator.asymmetric_key_gen()[0]
-    server_certificate = f"{public_key}:{SERVER_IP}:{SERVER_PORT}"
     # call this function to encrypt with a public key
     # public_key_encrypt(key, message)
-    signed_certificate = "D" + cryptgraphy_simulator.public_key_encrypt(public_key, server_certificate)
-    print(f"Sending signed certificate: {signed_certificate} to client.")
-
     connection.sendall(signed_certificate.encode('utf-8'))
     print(f"Sending signed certificate: {signed_certificate} to client for asymmetric encryption process.")
+
+    #  * Receive a request for a TLS handshake from the client
+    print("Waiting for indication of successful retrieval of public key, ip, and port from signed certificate.")
+    success_certificate = connection.recv(1024).decode('utf-8')
+    print(f"Received indication of success: {success_certificate}")
+    print("Proceeding with TLS handshake (2).")
+    #  * Send a signed certificate to the client
+    #    * A signed certificate variable should be available as 'signed_certificate'
+    # public_key = cryptgraphy_simulator.asymmetric_key_gen()[0]
+    # call this function to encrypt with a public key
+    # public_key_encrypt(key, message)
+    real_server_ip_port = f"{SERVER_IP}:{SERVER_PORT}"
+    connection.sendall(real_server_ip_port.encode('utf-8'))
+    print(f"Sending real Server IP ad PORT for verification: {real_server_ip_port}")
 
     #  * Receive an encrypted symmetric key from the client
     encrypted_symmetric_key = connection.recv(1024).decode('utf-8')
@@ -94,30 +104,28 @@ def process_message(message):
     order_type = order[0].strip()
 
     if order_type == "scoop":
-        if len(order) < 5:
+        if len(order) < 4:
             return "Your scoop order is missing your preferences! Please try again."
         size = order[1].strip()
         flavor = order[2].strip()
         syrup = order[3].strip()
-        syrup2 = order[4].strip()
-        return f"Here is your {size} {flavor} {order_type} with {syrup} {syrup2}!"
-
+        return f"Here is your {size} {flavor} {order_type} with {syrup}!"
+        
     elif order_type == "milkshake":
         if len(order) < 4:
             return "Your milkshake order is missing your preferences! Please try again."
         flavor = order[1].strip()
         milk = order[2].strip()
-        milk2 = order[3].strip()
-        syrup = order[4].strip()
-        return f"Here is your {flavor} {order_type} with {milk} {milk2} and {syrup}!"
+        syrup = order[3].strip()
+        return f"Here is your {flavor} {order_type} with {milk} and {syrup}!"
 
     elif order_type == "chipwich":
         if len(order) < 3:
             return "Your chipwich order is missing your preferences! Please try again."
         flavor = order[1].strip()
         cookie = order[2].strip()
-        cookie2 = order[3].strip()
-        return f"Here is your {flavor} chipwich with {cookie} {cookie2} cookies!"
+        return f"Here is your {flavor} chipwich with {cookie} cookies!"
+    
     else:
         return "You did not specify an order type! Please try ordering again."
 # -------------------------- from project 1 --------------------------

@@ -19,7 +19,7 @@ def parse_message(message):
     # and message to forward to that destination
     # raise NotImplementedError("Your job is to fill this function in. Remove this line when you're done.")
     SERVER_IP = message[:message.index('~IP~')]
-    SERVER_PORT = message[message.index('~IP~')+ 5:message.index('~port~')]
+    SERVER_PORT = int(message[message.index('~IP~')+ 4:message.index('~port~')])
     message = message[message.index('~port~')+6:]
     return SERVER_IP, SERVER_PORT, message
 

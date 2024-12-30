@@ -18,8 +18,11 @@ Although "echo-server.py" is included as a test server, your client and VPN shou
 Your secure client and secure server should be, well, secure. As the "man in the middle", your VPN should not be able to read any sensitive communications between the secure client and the secure server unless those communications are properly simulated secure. Make sure that 
 
 * Your client must obtain the desired message to be sent through the VPN from the terminal command line. This functionality is already provided in the client.py file.
+
 * As they run, the client and the VPN applications must generate tracing messages that document significant program milestones, e.g., when connections are made, when messages and sent and received, and what was sent and what was received. (Good examples of tracing messages can be found in the sample code provided.)
+
 * The client and server should be designed to anticipate and gracefully handle reasonable errors which could occur at either end of the communication channel. For example, the client should attempt to prevent malformed requests to the server, and the server should avoid crashing if it receives a malformed request. Remember, in the real world there is no guarantee that your server will only have to deal with communications from your (presumably friendly) client!
+
 * Source code of your client and server must be appropriately documented. Comments should be sufficient to allow a third party to understand your code, run it, and confirm that it works.
 
 ## Deliverables
