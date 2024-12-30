@@ -111,7 +111,7 @@ A second way our simlation fails to achieve real security is in the lack of veri
 ## Acknowledgements
 I did not collaborate with anyone on this assignment, but used online sources to review python syntax and specifically stack overflow to debug.
 
-## Client>Server/Server>Client Application Layer Message Format (incomplete)
+## Client>Server/Server>Client Application Layer Message Format
 
 If the order type is a scoop:
 "Here is your {size} {flavor} {order_type} with {syrup}!"
